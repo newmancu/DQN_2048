@@ -2,8 +2,11 @@ import random
 import numpy as np
 
 class Game:
-    def __init__(self, field = np.zeros([4,4], dtype='int')):
-        self.field = field
+    def __init__(self, field = None):
+        if field is None:
+            self.field = np.zeros([4,4], dtype='int').copy()
+        else:
+            self.field = field.copy()
         self.score = 0
         self.lose = False
 
@@ -88,9 +91,35 @@ class Game:
                 print(f"{item:4} ", end='')
             print()
 
-    # def step(self, x, y):
-    #     self.offset(x,y)
-    #     self.generate_number()
+    def one_hot_field(self, temp_field = None, max_classes = 16):
+        if temp_field is None:
+            temp_field = self.field
+        temp_field = temp_field.copy().flatten()
+        temp_field = np.log2(temp_field + 0.00001)
+        temp_field[temp_field < 0] = 0
+        temp_field = temp_field.astype('int')
+        
+        ans_field = np.zeros((temp_field.size, max_classes), dtype='int')
+        ans_field[np.arange(temp_field.size),temp_field] = 1
+        return ans_field
+
+    def step(self, arr):
+        prev_score = self.score
+        order = np.argsort(arr)[::-1]
+        case = {0:[0,1],
+                1:[0,-1],
+                2:[1,0],
+                3:[-1,0]}
+        for i in order:
+            fl = self.offset(*case[i])
+            if fl:
+                break
+        if not fl:
+            self.lose = True
+        else:
+            self.generate_number()
+        return self.one_hot_field(), self.score - prev_score, self.lose
+
 
     def startGame(self):
         self.generate_number()
@@ -115,3 +144,12 @@ class Game:
             offset = case[offset]
             state = self.offset(*offset)
 
+
+if __name__ == '__main__':
+    game = Game()
+    game.generate_number()
+    game.generate_number()
+    game.generate_number()
+    game.generate_number()
+    game.show_field()
+    print(game.one_hot_field())
