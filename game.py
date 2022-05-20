@@ -13,7 +13,7 @@ class Game:
     def generate_number(self):
         zero_cells = [[i,j] for i in range(4) for j in range(4) if self.field[i][j] == 0]
         cell = random.choice(zero_cells)
-        self.field[cell[0],[cell[1]]] = random.choice([2]*3 + [4])
+        self.field[cell[0],[cell[1]]] = random.choice([2]*8 + [4])
 
     def check_loose(self):
         g = Game(self.field.copy())
